@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link href="popup.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="no_channel">
+    No channel detected.
+  </div>
+
+  <div id="has_channel">
+    <div id="channel">
+      <div id="channel_name"></div>
+      <div id="channel_id"></div>
+      <div id="channel_status"></div>
+    </div>
+
+    <div id="preferences">
+      <form>
+        <div class="preference">
+          <label for="quality">Quality:</label>
+          <select id="quality" name="quality">
+            <option value="auto">auto</option>
+            <option value="2160p">2160p (4k)</option>
+            <option value="1440p">1440p</option>
+            <option value="1080p">1080p</option>
+            <option value="720p">720p</option>
+            <option value="480p">480p</option>
+            <option value="360p">360p</option>
+            <option value="240p">240p</option>
+            <option value="144p">144p</option>
+          </select>
+        </div>
+
+        <div class="preference">
+          <label for="speed">Speed:</label>
+          <select id="speed" name="speed">
+            <option value="0.25">0.25</option>
+            <option value="0.5">0.5</option>
+            <option value="0.75">0.75</option>
+            <option value="1">1</option>
+            <option value="1.25">1.25</option>
+            <option value="1.5">1.5</option>
+            <option value="1.75">1.75</option>
+            <option value="2">2</option>
+          </select>
+        </div>
+
+        <div class="buttons">
+          <button type="submit">Save</button>
+          <button type="reset">Reset</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

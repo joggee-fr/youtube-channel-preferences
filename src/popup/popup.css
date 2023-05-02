@@ -1,0 +1,24 @@
+html, body {
+  padding: 0.25em;
+}
+
+div#no_channel {
+  display: none;
+}
+
+div#has_channel {
+  display: none;
+}
+
+div#channel_status {
+  margin-top: 0.5em;
+  font-style: italic;
+}
+
+div.preference {
+  margin-top: 0.5em;
+}
+
+div.buttons {
+  margin-top: 0.5em;
+}
