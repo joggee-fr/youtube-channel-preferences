@@ -1,25 +1,27 @@
 import Preferences from '../preferences.js';
 
-let currentTab;
+function showDiv(element) {
+  element.style.display = "block";
+}
 
-function showChannelPreferences(hasChannelDiv, preferences) {
-  hasChannelDiv.querySelector("div#channel_name").innerHTML = preferences.channelName;
-  hasChannelDiv.querySelector("div#channel_id").innerHTML = `(${preferences.channelId})`;
+function showChannelPreferences(currentTab, successDiv, preferences) {
+  successDiv.querySelector("div#channel_name").innerHTML = preferences.channelName;
+  successDiv.querySelector("div#channel_id").innerHTML = `(${preferences.channelId})`;
 
-  hasChannelDiv.querySelector("div#channel_status").innerHTML =
+  successDiv.querySelector("div#channel_status").innerHTML =
     preferences.areSet() ? "" : "No preferences saved";
 
   // Quality
-  const qualitySelect = hasChannelDiv.querySelector("select#quality");
+  const qualitySelect = successDiv.querySelector("select#quality");
   const quality = preferences.quality ?? "auto";
   qualitySelect.value = quality;
 
   // Speed
-  const speedSelect = hasChannelDiv.querySelector("select#speed");
+  const speedSelect = successDiv.querySelector("select#speed");
   const speed = preferences.speed ?? 1;
   speedSelect.value = speed;
 
-  const form = hasChannelDiv.querySelector("form");
+  const form = successDiv.querySelector("form");
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     preferences.quality = qualitySelect.value;
@@ -36,30 +38,41 @@ function showChannelPreferences(hasChannelDiv, preferences) {
   });
 }
 
-function showPreferences(preferences) {
-  const noChannelDiv = document.querySelector("div#no_channel");
-  const hasChannelDiv = document.querySelector("div#has_channel");
-
-  if (preferences.hasChannel()) {
-    noChannelDiv.style.display = "none";
-    hasChannelDiv.style.display = "block";
-    showChannelPreferences(hasChannelDiv, preferences);
+function showPreferences(currentTab, preferences) {
+  if (preferences && preferences.hasChannel()) {
+    const successDiv = document.querySelector("div#success");
+    showDiv(successDiv);
+    showChannelPreferences(currentTab, successDiv, preferences);
   } else {
-    noChannelDiv.style.display = "block";
-    hasChannelDiv.style.display = "none";
+    const errorDiv = document.querySelector("div#error");
+    showDiv(errorDiv);
+    errorDiv.innerHTML = "No channel detected";
   }
+}
+
+function showNoTab() {
+  const errorDiv = document.querySelector("div#error");
+  showDiv(errorDiv);
+  errorDiv.innerHTML = "Invalid current tab";
 }
 
 async function init() {
   // Retrieve the active tab
-  const tabs = await browser.tabs.query({ active: true, lastFocusedWindow: true });
-  if (tabs.length > 0) {
-    // Retrieve current preferences
-    currentTab = tabs[0];
-    const data = await browser.tabs.sendMessage(currentTab.id, { cmd: "getCurrentPreferences" });
-    const preferences = new Preferences(data);
-    showPreferences(preferences);
+  try {
+    const tabs = await browser.tabs.query({ active: true, lastFocusedWindow: true });
+    if (tabs.length > 0) {
+      // Retrieve current preferences
+      let currentTab = tabs[0];
+      const data = await browser.tabs.sendMessage(currentTab.id, { cmd: "getCurrentPreferences" });
+      const preferences = new Preferences(data);
+      showPreferences(currentTab, preferences);
+    } else {
+      showNoTab();
+    }
+  } catch(e) {
+    showNoTab();
   }
+
 
   // Listen for messages
   browser.runtime.onMessage.addListener(request => {

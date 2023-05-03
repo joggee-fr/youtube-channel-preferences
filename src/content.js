@@ -5,7 +5,7 @@ import Preferences from './preferences.js';
 
 let log = logger({ level: "trace" });
 
-let currentPreferences = {};
+let currentPreferences = null;
 
 function setQuality(player, quality) {
   log.info(`Set quality: ${quality}`);
@@ -174,7 +174,7 @@ browser.runtime.onMessage.addListener(request => {
   log.trace("Received message from background script");
 
   if (request.cmd === "getCurrentPreferences") {
-    return Promise.resolve(currentPreferences.toData());
+    return Promise.resolve(currentPreferences ? currentPreferences.toData() : null);
   } else if (request.cmd === "savePreferences") {
     log.debug("Received savePreferences command with data: %j", request.data);
     currentPreferences = new Preferences(request.data);

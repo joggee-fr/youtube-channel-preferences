@@ -2,11 +2,11 @@ html, body {
   padding: 0.25em;
 }
 
-div#no_channel {
+div#error {
   display: none;
 }
 
-div#has_channel {
+div#success {
   display: none;
 }
 
