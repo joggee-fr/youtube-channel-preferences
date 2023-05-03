@@ -1,10 +1,15 @@
-# YouTube channel preferences
-A web extension to save different preferences (quality, speed) per YouTube channel.
+# YouTube channel preferences web extension
+This web extension allows to define and apply different preferences (quality, speed) per YouTube channel.
+
+## Usage
+- Open a YouTube video from your favorite channel
+- Open the extension popup to save or remove dedicated preferences
+- The preferences will now be applied to every videos of the same channel
 
 ## Build
 The extension is bundled using [Parcel](https://github.com/parcel-bundler/parcel).
 
-First, download dependencies using [npm](https://github.com/npm/cli).
+Once this repository has been cloned, download the dependencies using [npm](https://github.com/npm/cli).
 
 ```
 $ npm install
