@@ -1,8 +1,10 @@
 {
   "private": true,
   "scripts": {
-    "build": "parcel build src/manifest.json --dist-dir dist --no-cache --no-source-maps",
-    "watch": "parcel watch src/manifest.json --dist-dir dist --no-cache --no-hmr"
+    "clean": "node scripts/clean.mjs",
+    "build": "npm run clean && parcel build src/manifest.json --dist-dir dist --no-cache --no-source-maps",
+    "watch": "npm run clean && parcel watch src/manifest.json --dist-dir dist --no-cache --no-hmr",
+    "pack": "npm run build && node scripts/pack.mjs"
   },
   "dependencies": {
     "console-log-level": "^1.4.1",
@@ -10,6 +12,7 @@
   },
   "devDependencies": {
     "@parcel/config-webextension": "^2.8.3",
+    "archiver": "^5.3.1",
     "parcel": "^2.8.3",
     "process": "^0.11.10",
     "util": "^0.12.5"
