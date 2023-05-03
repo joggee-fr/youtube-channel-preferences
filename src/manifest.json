@@ -4,7 +4,7 @@
   "description": "Set video preferences per YouTube channel",
   "version": "0.0.1",
   "icons": {
-    "96": "icons/icon.png"
+    "96": "icons/icon.svg"
   },
   "content_scripts": [
     {
@@ -13,7 +13,7 @@
     }
   ],
   "browser_action": {
-    "default_icon": "icons/icon.png",
+    "default_icon": "icons/icon.svg",
     "default_title": "YouTube channel preferences",
     "default_popup": "popup/index.html",
     "browser_style": true
