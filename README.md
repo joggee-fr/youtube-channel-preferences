@@ -6,6 +6,9 @@ This web extension allows to define and apply different preferences (quality, sp
 - Open the extension popup to save or remove dedicated preferences
 - The preferences will now be applied to every videos of the same channel
 
+## Installation
+- [Firefox add-ons](https://addons.mozilla.org/firefox/addon/youtube-channel-preferences/)
+
 ## Build
 The extension is bundled using [Parcel](https://github.com/parcel-bundler/parcel).
 
