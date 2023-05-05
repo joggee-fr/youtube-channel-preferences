@@ -4,12 +4,16 @@ function showDiv(element) {
   element.style.display = "block";
 }
 
+function showChannelStatus(statusDiv, preferencesSet) {
+  statusDiv.innerHTML = preferencesSet ? "" : "No preferences saved";
+}
+
 function showChannelPreferences(currentTab, successDiv, preferences) {
   successDiv.querySelector("div#channel_name").innerHTML = preferences.channelName;
   successDiv.querySelector("div#channel_id").innerHTML = `(${preferences.channelId})`;
 
-  successDiv.querySelector("div#channel_status").innerHTML =
-    preferences.areSet() ? "" : "No preferences saved";
+  const statusDiv = successDiv.querySelector("div#channel_status");
+  showChannelStatus(statusDiv, preferences.areSet());
 
   // Quality
   const qualitySelect = successDiv.querySelector("select#quality");
@@ -26,7 +30,8 @@ function showChannelPreferences(currentTab, successDiv, preferences) {
     e.preventDefault();
     preferences.quality = qualitySelect.value;
     preferences.speed = parseFloat(speedSelect.value);
-    browser.tabs.sendMessage(currentTab.id, { cmd: "savePreferences", data: preferences.toData() });
+    await browser.tabs.sendMessage(currentTab.id, { cmd: "savePreferences", data: preferences.toData() });
+    showChannelStatus(statusDiv, true);
   });
 
   form.addEventListener("reset", async (e) => {
@@ -34,7 +39,8 @@ function showChannelPreferences(currentTab, successDiv, preferences) {
     qualitySelect.value = "auto";
     speedSelect.value = 1;
     preferences.reset();
-    browser.tabs.sendMessage(currentTab.id, { cmd: "removePreferences", data: preferences.toData() });
+    await browser.tabs.sendMessage(currentTab.id, { cmd: "removePreferences", data: preferences.toData() });
+    showChannelStatus(statusDiv, false);
   });
 }
 
