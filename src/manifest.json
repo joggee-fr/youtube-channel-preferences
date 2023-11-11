@@ -18,5 +18,8 @@
     "default_popup": "popup/index.html",
     "browser_style": true
   },
+  "options_ui": {
+    "page": "options/index.html"
+  },
   "permissions": [ "storage", "activeTab" ]
 }
