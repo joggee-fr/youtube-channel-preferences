@@ -3,7 +3,7 @@ import logger from "console-log-level";
 
 import Preferences from './preferences.js';
 
-let log = logger({ level: "trace" });
+let log = logger({ prefix: "youtube-channel-preferences", level: "trace" });
 
 let currentPreferences = null;
 
@@ -71,29 +71,26 @@ function setChannelPreferences(notifyBackground) {
   setSpeed(player,currentPreferences.speed);
 }
 
-async function handleChannel(a) {
-  log.debug(a);
+async function handleChannel(channel) {
+  log.debug(`Channel: ${channel.id} ${channel.name}`);
 
-  const channelId = a.getAttribute("href").slice(1);
-  const channelName = a.text;
-
-  const savedData = await browser.storage.local.get(channelId);
-  let savedPreferences = new Preferences(savedData);
+  const savedData = await browser.storage.local.get(channel.id);
   log.debug("Saved preferences: %j", savedData);
+  let savedPreferences = new Preferences(savedData);
 
   // Check if some preferences have been already saved
   if (!savedPreferences.hasChannel()) {
-    log.info(`No preferences already saved for channel ${channelId}`);
+    log.info(`No preferences already saved for channel ${channel.id}`);
     currentPreferences = new Preferences();
-    currentPreferences.channelId = channelId;
-    currentPreferences.channelName = channelName;
+    currentPreferences.channelId = channel.id;
+    currentPreferences.channelName = channel.name;
     setChannelPreferences(true);
     return;
   }
 
   // The channel name may have changed
-  if (savedPreferences.channelName != channelName) {
-    savedPreferences.channelName = channelName;
+  if (savedPreferences.channelName != channel.name) {
+    savedPreferences.channelName = channel.name;
     // Do not wait for result, keep save asynchronous
     browser.storage.local.set(savedPreferences.toData());
   }
@@ -102,9 +99,15 @@ async function handleChannel(a) {
   setChannelPreferences(true);
 }
 
-function observeChannelLink(a) {
+async function handleChannelId(channel, channelDiv, a) {
+  channel.id = a.getAttribute("href").slice(1);
+  log.debug(`Channel id: ${channel.id}`);
+  observeNode(channelDiv, "a.yt-formatted-string", "channel name link", a => handleChannelName(channel, a));
+}
+
+function observeChannelId(channel, channelDiv, a) {
   if (a.hasAttribute("href")) {
-    handleChannel(a);
+    handleChannelId(channel, channelDiv, a);
   }
 
   // Observe href attribute to follow changes
@@ -112,61 +115,47 @@ function observeChannelLink(a) {
   let observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (mutation.attributeName === "href")
-        handleChannel(a);
+        handleChannelId(channel, channelDiv, a);
     }
   });
 
   observer.observe(a, { attributes: true });
 }
 
-function observeChannelDiv(channelDiv) {
-  const linkSelector = "a.yt-formatted-string";
+function handleChannelName(channel, a) {
+  channel.name = a.text;
+  log.debug(`Channel name: ${channel.name}`);
+  handleChannel(channel);
+}
 
-  log.debug(channelDiv);
-
-  // Retrieve the link containing the channel name
-  let a = channelDiv.querySelector(linkSelector);
-  if (a) {
-    log.debug("Found channel link without observing");
-    observeChannelLink(a);
+function observeNode(parent, selector, name, cb) {
+  let s = parent.querySelector(selector);
+  if (s) {
+    log.debug(`Found ${name} without observing`);
+    cb(s);
     return;
   }
 
-  log.debug("Wait for channel link");
+  log.debug(`Wait for ${name}`);
   let observer = new MutationObserver(() => {
-    a = channelDiv.querySelector(linkSelector);
-    if (a) {
-      observeChannelLink(a);
+    s = parent.querySelector(selector);
+    if (s) {
+      log.debug(`Found ${name}`);
       observer.disconnect();
+      cb(s);
     }
   });
 
-  observer.observe(channelDiv, { childList: true, subtree: true });
+  observer.observe(parent, { childList: true, subtree: true });
+}
+
+function observeChannelDiv(channel, channelDiv) {
+  observeNode(channelDiv, "a.ytd-video-owner-renderer", "channel id link", a => observeChannelId(channel, channelDiv, a));
 }
 
 function retrieveChannel() {
-  const channelDivSelector = "div#owner";
-
-  // Check if channel div already exist
-  const channelDiv = document.querySelector(channelDivSelector);
-  if (channelDiv) {
-    log.debug("Found channel div without observing");
-    observeChannelDiv(channelDiv);
-    return;
-  }
-
-  log.debug("Wait for channel div");
-
-  let observer = new MutationObserver(() => {
-    const channelDiv = document.querySelector(channelDivSelector);
-    if (channelDiv) {
-      log.debug("Found channel div");
-      observeChannelDiv(channelDiv);
-      observer.disconnect();
-    }
-  });
-
-  observer.observe(document.body, { childList: true, subtree: true });
+  let channel = {};
+  observeNode(document, "div#owner", "channel div", div => observeChannelDiv(channel, div));
 }
 
 // Handle messages
