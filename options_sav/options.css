@@ -1,0 +1,21 @@
+html, body {
+  min-height: 18em;
+}
+
+div.preference {
+  margin-top: 0.5em;
+  display: inline-block;
+}
+
+div.buttons {
+  margin-top: 0.5em;
+}
+
+table, td {
+  border: 1px solid gray;
+  border-collapse: collapse;
+}
+
+thead {
+  font-weight: bold;
+}

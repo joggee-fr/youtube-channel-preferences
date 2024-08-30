@@ -128,7 +128,7 @@ function handleChannelName(channel, a) {
   handleChannel(channel);
 }
 
-function observeNode(parent, selector, name, cb) {
+function observeNode(parent, selector, name, disconnect, cb) {
   let s = parent.querySelector(selector);
   if (s) {
     log.debug(`Found ${name} without observing`);
@@ -137,11 +137,15 @@ function observeNode(parent, selector, name, cb) {
   }
 
   log.debug(`Wait for ${name}`);
-  let observer = new MutationObserver(() => {
+  let observer = new MutationObserver((records) => {
+    console.log(records);
     s = parent.querySelector(selector);
     if (s) {
       log.debug(`Found ${name}`);
-      observer.disconnect();
+
+      if (disconnect)
+        observer.disconnect();
+
       cb(s);
     }
   });
@@ -149,13 +153,32 @@ function observeNode(parent, selector, name, cb) {
   observer.observe(parent, { childList: true, subtree: true });
 }
 
-function observeChannelDiv(channel, channelDiv) {
-  observeNode(channelDiv, "a.ytd-video-owner-renderer", "channel id link", a => observeChannelId(channel, channelDiv, a));
+function observeChannelDiv(channel, div) {
+  observeNode(div, "a.ytd-video-owner-renderer", "channel id link", true, a => observeChannelId(channel, div, a));
+}
+
+function observeChannelHandle(channel, yt) {
+  channel.id = yt.textContent;
+  log.debug(`Channel id: ${channel.id}`);
+  observeNode(document, "yt-formatted-string#text", "channel text", true,
+    yt => {
+      channel.name = yt.textContent;
+      log.debug(`Channel name: ${channel.name}`);
+      handleChannel(channel);
+  });
+}
+
+function observeChannelContainer(channel, div) {
+  observeNode(div, "yt-formatted-string#channel-handle", "channel handle", true, yt => observeChannelHandle(channel, yt));
 }
 
 function retrieveChannel() {
   let channel = {};
-  observeNode(document, "div#owner", "channel div", div => observeChannelDiv(channel, div));
+  // Video page
+  observeNode(document, "div#owner", "channel div", true, div => observeChannelDiv(channel, div));
+
+  // Channel page
+  observeNode(document, "div#channel-container", "channel container", false, div => observeChannelContainer(channel, div));
 }
 
 // Handle messages
